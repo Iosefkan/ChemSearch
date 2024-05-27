@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Video from "../components/Video.svelte";
+    import VideoDel from "../components/VideoDel.svelte";
     import Accordion from "../components/Accordion.svelte";
     import Authorize from "../Authorize.svelte";
     import { onMount } from "svelte";
@@ -11,7 +11,7 @@
     let topics: any = [];
     let searched: boolean = false;
     let empty: boolean = false;
-
+    
     async function logout(){
         const response = await fetch("/fallback/auth/logout", {
             method: "GET"
@@ -24,9 +24,6 @@
             alert("Ошибка при выходе");
         }
     }
-    function favourite(){
-        window.location.href = "/favourite";
-    }
     async function search(){
         let url = "/fallback/videos?";
         for (let i = 0; i < gradeGroup.length; i++){
@@ -38,6 +35,7 @@
         if (name){
             url += `name=${name}`;
         }
+        console.log(url);
         const response = await fetch(url, {
             method: "GET",
             headers: {
@@ -71,12 +69,14 @@
             }
         });
         grades = await resultGrade.json();
+        console.log(topics);
+        console.log(grades);
     })
 </script>
 
 <Authorize let:data url={"/fallback/videos"}>
     <main class="flex flex-col items-stretch justify-center">
-        <div class="w-full grid grid-cols-9 my-4">
+        <div class="w-full grid grid-cols-8 my-4">
             <div class="col-span-2 justify-self-start mx-5">
                 <div class=" font-sans italic font-bold text-4xl text-center">
                     <span class="text-green-800">chem</span>
@@ -102,20 +102,6 @@
                     </svg>
                 </button>
             </div>
-            <button class="justify-self-end mx-10 col-span-1" on:click|preventDefault={favourite}>
-                <svg class="hover:fill-slate-600 self-center" fill="#000000" height="24" width="24" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-                viewBox="0 0 471.701 471.701" xml:space="preserve">
-                <g>
-                    <path d="M433.601,67.001c-24.7-24.7-57.4-38.2-92.3-38.2s-67.7,13.6-92.4,38.3l-12.9,12.9l-13.1-13.1
-                        c-24.7-24.7-57.6-38.4-92.5-38.4c-34.8,0-67.6,13.6-92.2,38.2c-24.7,24.7-38.3,57.5-38.2,92.4c0,34.9,13.7,67.6,38.4,92.3
-                        l187.8,187.8c2.6,2.6,6.1,4,9.5,4c3.4,0,6.9-1.3,9.5-3.9l188.2-187.5c24.7-24.7,38.3-57.5,38.3-92.4
-                        C471.801,124.501,458.301,91.701,433.601,67.001z M414.401,232.701l-178.7,178l-178.3-178.3c-19.6-19.6-30.4-45.6-30.4-73.3
-                        s10.7-53.7,30.3-73.2c19.5-19.5,45.5-30.3,73.1-30.3c27.7,0,53.8,10.8,73.4,30.4l22.6,22.6c5.3,5.3,13.8,5.3,19.1,0l22.4-22.4
-                        c19.6-19.6,45.7-30.4,73.3-30.4c27.6,0,53.6,10.8,73.2,30.3c19.6,19.6,30.3,45.6,30.3,73.3
-                        C444.801,187.101,434.001,213.101,414.401,232.701z"/>
-                </g>
-                </svg>
-            </button>
             <button class="justify-self-end mx-10 col-span-1" on:click|preventDefault={logout}>
                 <svg class="feather feather-user hover:fill-slate-600 self-center" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -131,35 +117,44 @@
                 <Accordion>
                     <span slot="head" class="mx-3 font-sans">Класс</span>
                     <div slot="details" class="flex flex-col items-justify mx-3 font-sans">
-                        {#each grades as grade}
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    name="gradeId"
-                                    value={grade.id}
-                                    class="accent-[#28c641]"
-                                    bind:group={gradeGroup}
-                                />
-                                {grade.gradeNumber} класс
-                            </label>
-                        {/each}
+                        {#await grades}
+                            <p></p>
+                        {:then res} 
+                            {#each grades as grade}
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        name="gradeId"
+                                        value={grade.id}
+                                        class="accent-[#28c641]"
+                                        bind:group={gradeGroup}
+                                    />
+                                    {grade.gradeNumber} класс
+                                </label>
+                            {/each}
+                        {/await}  
                     </div>
                 </Accordion>
                 <Accordion>
                     <span slot="head" class="mx-3 font-sans">Тема</span>
                     <div slot="details" class="flex flex-col items-justify mx-3 font-sans">
-                        {#each topics as topic}
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    name="topicId"
-                                    value={topic.id}
-                                    class=" checked:bg-[#28c641]"
-                                    bind:group={topicGroup}
-                                />
-                                {topic.name}
-                            </label>
-                        {/each}
+                        {#await topics}
+                            <p></p>
+                        {:then res} 
+                            {#each topics as topic}
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        name="topicId"
+                                        value={topic.id}
+                                        class=" checked:bg-[#28c641]"
+                                        bind:group={topicGroup}
+                                    />
+                                    {topic.name}
+                                </label>
+                            {/each}
+                        {/await}
+
                     </div>
                 </Accordion>
                 
@@ -168,7 +163,7 @@
             <div class="grid grid-cols-2 justify-items-center mx-6 w-5/6">
                 {#if (!searched)}
                     {#each data as video}
-                        <Video {...video}/>
+                        <VideoDel {...video}/>
                     {/each}
                 {:else}
                     {#await searchData}
@@ -180,7 +175,7 @@
                             </p>
                         {:else}
                             {#each searchData as video}
-                                <Video {...video}/>
+                                <VideoDel {...video}/>
                             {/each}
                         {/if}
                     {/await}
